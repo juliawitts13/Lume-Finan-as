@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FinançasPRO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f4f5f7; color: #1a1a2e; font-size: 14px; }
+
+  /* ─── HEADER ─── */
+  header { background: #fff; border-bottom: 1px solid #e4e6ea; padding: 0 28px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 8px; }
+  .logo-mark { width: 26px; height: 26px; background: #1a1a2e; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; }
+  .logo-text { font-weight: 700; font-size: 15px; color: #1a1a2e; }
+  nav { display: flex; gap: 2px; }
+  nav a { color: #868e96; text-decoration: none; border-radius: 6px; padding: 6px 13px; font-size: 13px; cursor: pointer; transition: all .15s; }
+  nav a.active { background: #f1f3f5; color: #1a1a2e; font-weight: 600; }
+  nav a:hover:not(.active) { color: #495057; background: #f8f9fa; }
+  .header-actions { display: flex; gap: 8px; }
+  .btn { border: none; border-radius: 7px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity .15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: #1a1a2e; color: #fff; }
+  .btn-purple { background: #7c3aed; color: #fff; }
+
+  /* ─── PAGES ─── */
+  .page { display: none; }
+  .page.active { display: block; }
+  main { max-width: 1080px; margin: 0 auto; padding: 28px 20px; }
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .page-title { font-size: 19px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 2px; }
+  .page-sub { font-size: 12px; color: #868e96; }
+
+  /* ─── COMMON ─── */
+  .period-btn { background: transparent; color: #868e96; border: 1px solid #dee2e6; border-radius: 6px; padding: 5px 14px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .15s; }
+  .period-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+  .periods { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+
+  .stats { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+  .stat-card { background: #fff; border: 1px solid #e4e6ea; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 140px; }
+  .stat-label { font-size: 10px; font-weight: 600; color: #adb5bd; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-size: 22px; font-weight: 700; letter-spacing: -1px; margin-bottom: 2px; }
+  .stat-sub { font-size: 11px; color: #adb5bd; }
+
+  .table-card { background: #fff; border: 1px solid #e4e6ea; border-radius: 10px; overflow: hidden; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 540px; }
+  thead tr { border-bottom: 1px solid #f1f3f5; }
+  th { padding: 11px 16px; text-align: left; color: #adb5bd; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; cursor: pointer; user-select: none; }
+  th:hover { color: #868e96; }
+  tbody tr { border-bottom: 1px solid #f8f9fa; transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f8f9fa; }
+  td { padding: 11px 16px; }
+  .date-cell { color: #868e96; font-size: 12px; white-space: nowrap; }
+  .badge { margin-left: 5px; font-size: 10px; font-weight: 700; }
+  .badge-prev { color: #7c3aed; }
+  .badge-future { color: #7c3aed; }
+  .tag { display: inline-block; border-radius: 5px; padding: 2px 9px; font-size: 11px; font-weight: 600; }
+  .tag-income { background: #f0fdf4; color: #16a34a; }
+  .tag-expense { background: #fff5f5; color: #dc2626; }
+  .tag-unica { background: #f8f9fa; color: #495057; }
+  .tag-parc { background: #f5f3ff; color: #7c3aed; }
+  .tag-fixa { background: #eff6ff; color: #2563eb; }
+  .cat-cell { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #495057; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .val-income { font-weight: 600; color: #16a34a; white-space: nowrap; }
+  .val-expense { font-weight: 600; color: #dc2626; white-space: nowrap; }
+  .desc-cell { color: #495057; }
+  .empty { color: #dee2e6; }
+  .actions { display: flex; gap: 6px; }
+  .btn-edit { background: #f8f9fa; color: #495057; border: 1px solid #dee2e6; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .btn-del { background: #fff5f5; color: #e03131; border: 1px solid #ffc9c9; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .table-footer { margin-top: 10px; font-size: 12px; color: #adb5bd; display: flex; gap: 16px; flex-wrap: wrap; }
+  .table-footer .green { color: #16a34a; font-weight: 600; }
+  .table-footer .red { color: #dc2626; font-weight: 600; }
+
+  /* ─── FILTERS ─── */
+  .filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .search-box { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #dee2e6; border-radius: 7px; padding: 7px 12px; flex: 1; min-width: 160px; }
+  .search-box input { border: none; outline: none; font-size: 13px; color: #1a1a2e; background: transparent; width: 100%; font-family: inherit; }
+  select { background: #fff; border: 1px solid #dee2e6; border-radius: 7px; padding: 7px 11px; font-size: 13px; color: #495057; outline: none; cursor: pointer; font-family: inherit; }
+
+  /* ─── DASHBOARD CHART ─── */
+  .chart-card { background: #fff; border: 1px solid #e4e6ea; border-radius: 10px; padding: 20px 22px; margin-bottom: 14px; }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+  .chart-title { font-size: 13px; font-weight: 600; color: #1a1a2e; }
+  .chart-filters { display: flex; gap: 6px; }
+  .fake-chart { display: flex; align-items: flex-end; gap: 10px; height: 160px; padding: 0 4px; }
+  .chart-group { display: flex; gap: 3px; align-items: flex-end; flex: 1; }
+  .bar { border-radius: 4px 4px 0 0; min-width: 12px; }
+  .bar-income { background: #16a34a; }
+  .bar-expense { background: #dc2626; }
+  .bar-proj { opacity: 0.35; }
+  .chart-x { display: flex; gap: 10px; margin-top: 8px; padding: 0 4px; }
+  .chart-x span { flex: 1; text-align: center; font-size: 10px; color: #adb5bd; }
+  .chart-legend { display: flex; gap: 16px; justify-content: flex-end; margin-top: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #868e96; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* ─── LIMIT BAR ─── */
+  .limit-card { background: #fff; border: 1px solid #e4e6ea; border-radius: 10px; padding: 14px 20px; margin-bottom: 14px; }
+  .limit-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+  .limit-label { color: #868e96; }
+  .limit-value { font-weight: 600; color: #1a1a2e; }
+  .bar-track { height: 6px; background: #f1f3f5; border-radius: 3px; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width .4s; }
+
+  /* ─── GOALS IN DASHBOARD ─── */
+  .goals-card { background: #fff; border: 1px solid #e4e6ea; border-radius: 10px; padding: 20px 22px; }
+  .sec-title { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 16px; }
+  .goal-dash { margin-bottom: 16px; }
+  .goal-dash:last-child { margin-bottom: 0; }
+  .goal-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .goal-name { font-size: 13px; font-weight: 600; }
+  .goal-pct-ok { font-size: 12px; font-weight: 700; color: #16a34a; }
+  .goal-pct-warn { font-size: 12px; font-weight: 700; color: #dc2626; }
+  .goal-pct-done { font-size: 12px; font-weight: 700; color: #2563eb; }
+  .goal-track { height: 6px; background: #f1f3f5; border-radius: 3px; margin-bottom: 5px; }
+  .goal-fill-ok { height: 100%; border-radius: 3px; background: #16a34a; }
+  .goal-fill-warn { height: 100%; border-radius: 3px; background: #ea580c; }
+  .goal-fill-done { height: 100%; border-radius: 3px; background: #2563eb; }
+  .goal-vals { display: flex; justify-content: space-between; font-size: 11px; color: #adb5bd; }
+
+  /* ─── CREDIT CARDS ─── */
+  .cards-grid { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .credit-card { border-radius: 14px; padding: 20px 22px; color: #fff; flex: 1; min-width: 220px; max-width: 300px; cursor: pointer; transition: transform .15s, box-shadow .15s; position: relative; overflow: hidden; }
+  .credit-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+  .credit-card.selected { outline: 3px solid #1a1a2e; }
+  .credit-card::before { content:''; position:absolute; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,0.07); top:-50px; right:-30px; }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .card-name { font-size: 13px; opacity: 0.85; }
+  .card-chip { width: 26px; height: 18px; background: rgba(255,255,255,0.3); border-radius: 3px; }
+  .card-spent { font-size: 24px; font-weight: 700; letter-spacing: -1px; margin-bottom: 2px; }
+  .card-limit-txt { font-size: 11px; opacity: 0.75; margin-bottom: 12px; }
+  .card-bar-track { height: 4px; background: rgba(255,255,255,0.25); border-radius: 2px; margin-bottom: 12px; }
+  .card-bar-fill { height: 100%; border-radius: 2px; background: #fff; }
+  .card-footer { display: flex; justify-content: space-between; font-size: 11px; opacity: 0.75; margin-bottom: 10px; }
+  .card-btns { display: flex; gap: 6px; }
+  .card-btn { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit; }
+  .add-card { border: 2px dashed #dee2e6; border-radius: 14px; padding: 20px; flex: 1; min-width: 160px; max-width: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #adb5bd; background: #fff; transition: all .15s; }
+  .add-card:hover { border-color: #adb5bd; color: #868e96; }
+
+  .fatura-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .fatura-tabs { display: flex; gap: 6px; }
+  .fatura-tab { background: transparent; color: #868e96; border: 1px solid #dee2e6; border-radius: 6px; padding: 4px 12px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .fatura-tab.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+  .fatura-total { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-top: 1px solid #f1f3f5; background: #f8f9fa; }
+  .fatura-total-label { font-size: 12px; color: #868e96; font-weight: 600; }
+  .fatura-total-value { font-size: 15px; font-weight: 700; color: #dc2626; }
+
+  /* ─── GOALS PAGE ─── */
+  .goals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+  .goal-card { background: #fff; border: 1px solid #e4e6ea; border-radius: 12px; padding: 20px 22px; }
+  .goal-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px; }
+  .goal-card-name { font-size: 14px; font-weight: 700; }
+  .goal-type-txt { font-size: 11px; color: #adb5bd; margin-bottom: 13px; }
+  .goal-card-track { height: 8px; background: #f1f3f5; border-radius: 4px; margin-bottom: 8px; }
+  .goal-card-fill { height: 100%; border-radius: 4px; }
+  .goal-card-values { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 12px; }
+  .goal-card-status { border-radius: 7px; padding: 8px 12px; font-size: 12px; margin-bottom: 14px; font-weight: 500; }
+  .status-ok { background: #f0fdf4; color: #16a34a; }
+  .status-warn { background: #fff5f5; color: #dc2626; }
+  .status-done { background: #eff6ff; color: #2563eb; }
+  .sim-box { border-top: 1px solid #f1f3f5; padding-top: 12px; margin-bottom: 14px; }
+  .sim-label { font-size: 11px; color: #868e96; margin-bottom: 6px; }
+  .sim-row { display: flex; align-items: center; gap: 8px; }
+  .sim-input { background: #fff; border: 1px solid #dee2e6; border-radius: 7px; padding: 6px 10px; font-size: 12px; color: #1a1a2e; outline: none; font-family: inherit; width: 120px; }
+  .sim-result { font-size: 12px; color: #2563eb; font-weight: 600; }
+  .goal-actions { display: flex; gap: 8px; }
+  .goal-add { border: 2px dashed #dee2e6; border-radius: 12px; padding: 36px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #adb5bd; background: #fff; transition: all .15s; }
+  .goal-add:hover { border-color: #adb5bd; color: #868e96; }
+
+  /* ─── CATEGORIES PAGE ─── */
+  .type-tabs { display: flex; gap: 6px; margin-bottom: 20px; }
+  .type-tab { background: #fff; border: 1px solid #dee2e6; border-radius: 7px; padding: 6px 16px; font-size: 13px; font-weight: 500; cursor: pointer; color: #868e96; font-family: inherit; transition: all .15s; }
+  .type-tab.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+  .cats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+  .cat-card { background: #fff; border: 1px solid #e4e6ea; border-radius: 12px; padding: 18px 20px; }
+  .cat-header { display: flex; align-items: center; justify-content: space-between; }
+  .cat-left { display: flex; align-items: center; gap: 12px; cursor: pointer; flex: 1; }
+  .cat-icon-box { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .cat-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .cat-meta { font-size: 11px; color: #adb5bd; }
+  .cat-type-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-left: 5px; }
+  .badge-income { background: #f0fdf4; color: #16a34a; }
+  .badge-expense { background: #fff5f5; color: #dc2626; }
+  .badge-both { background: #f5f3ff; color: #7c3aed; }
+  .cat-bar-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  .cat-bar-track { flex: 1; height: 4px; background: #f1f3f5; border-radius: 2px; }
+  .cat-bar-fill { height: 100%; border-radius: 2px; }
+  .cat-bar-pct { font-size: 11px; color: #adb5bd; font-weight: 500; width: 28px; text-align: right; }
+  .expand-btn { font-size: 11px; color: #adb5bd; background: none; border: none; cursor: pointer; font-family: inherit; margin-top: 8px; padding: 0; }
+  .subcats { margin-top: 12px; border-top: 1px solid #f1f3f5; padding-top: 10px; display: none; }
+  .subcats.open { display: block; }
+  .subcat-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #f8f9fa; }
+  .subcat-item:last-of-type { border-bottom: none; }
+  .subcat-name { font-size: 12px; color: #495057; display: flex; align-items: center; gap: 5px; }
+  .subcat-arrow { color: #adb5bd; font-size: 11px; }
+  .btn-del-sm { background: #fff5f5; color: #e03131; border: 1px solid #ffc9c9; border-radius: 5px; padding: 2px 7px; font-size: 11px; cursor: pointer; font-family: inherit; }
+  .subcat-add { display: flex; gap: 8px; margin-top: 10px; }
+  .subcat-input { flex: 1; background: #fff; border: 1px solid #dee2e6; border-radius: 7px; padding: 6px 10px; font-size: 12px; color: #1a1a2e; outline: none; font-family: inherit; }
+  .btn-add-sub { background: #1a1a2e; color: #fff; border: none; border-radius: 7px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .cat-add { border: 2px dashed #dee2e6; border-radius: 12px; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: #adb5bd; background: #fff; transition: all .15s; }
+  .cat-add:hover { border-color: #adb5bd; color: #868e96; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 14px; padding: 26px; width: 460px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.12); border: 1px solid #e9ecef; }
+  .modal-title { font-size: 15px; font-weight: 700; margin-bottom: 18px; }
+  .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; flex: 1; gap: 4px; }
+  .form-label { font-size: 12px; font-weight: 500; color: #495057; }
+  .form-input { background: #fff; border: 1px solid #dee2e6; border-radius: 7px; padding: 8px 11px; color: #1a1a2e; font-size: 13px; outline: none; font-family: inherit; width: 100%; }
+  .form-select { background: #fff; border: 1px solid #dee2e6; border-radius: 7px; padding: 8px 11px; color: #1a1a2e; font-size: 13px; outline: none; font-family: inherit; width: 100%; cursor: pointer; }
+  .type-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
+  .type-btn { flex: 1; padding: 9px; border-radius: 7px; border: 1px solid #dee2e6; cursor: pointer; font-weight: 600; font-size: 13px; font-family: inherit; background: #fff; color: #868e96; transition: all .15s; }
+  .type-btn.t-income { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+  .type-btn.t-expense { background: #fff5f5; color: #dc2626; border-color: #fecaca; }
+  .type-btn.t-savings { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+  .type-btn.t-purple { background: #f5f3ff; color: #7c3aed; border-color: #c4b5fd; }
+  .recurring-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; cursor: pointer; font-size: 13px; color: #495057; font-weight: 500; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+  .btn-cancel { flex: 1; background: #f8f9fa; color: #495057; border: 1px solid #dee2e6; border-radius: 7px; padding: 9px; cursor: pointer; font-weight: 600; font-size: 13px; font-family: inherit; }
+  .btn-save { flex: 1; background: #1a1a2e; color: #fff; border: none; border-radius: 7px; padding: 9px; cursor: pointer; font-weight: 600; font-size: 13px; font-family: inherit; }
+  .color-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .color-dot { width: 26px; height: 26px; border-radius: 6px; cursor: pointer; border: 3px solid transparent; }
+  .color-dot.selected { border-color: #1a1a2e; }
+  .icon-picker { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+  .icon-opt { font-size: 19px; cursor: pointer; padding: 3px 5px; border-radius: 6px; border: 1px solid transparent; }
+  .icon-opt.selected { background: #f1f3f5; border-color: #dee2e6; }
+  .preview-box { background: #f8f9fa; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; margin: 12px 0; border: 1px solid #f1f3f5; }
+  .preview-icon-box { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .preview-name { font-weight: 600; font-size: 14px; }
+
+  /* ─── TOAST ─── */
+  .toast { position: fixed; bottom: 22px; right: 22px; background: #1a1a2e; color: #fff; border-radius: 8px; padding: 11px 18px; font-size: 13px; font-weight: 500; z-index: 999; box-shadow: 0 4px 20px rgba(0,0,0,0.15); opacity: 0; transform: translateY(10px); transition: all .25s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ─── SUMMARY PILLS ─── */
+  .summary { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .summary-pill { background: #fff; border: 1px solid #e4e6ea; border-radius: 8px; padding: 10px 18px; }
+  .s-label { font-size: 11px; color: #adb5bd; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+  .s-value { font-size: 15px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">₿</div>
+    <span class="logo-text">FinançasPRO</span>
+  </div>
+  <nav>
+    <a onclick="nav('dashboard')" class="active" id="nav-dashboard">Dashboard</a>
+    <a onclick="nav('transactions')" id="nav-transactions">Transações</a>
+    <a onclick="nav('cards')" id="nav-cards">Cartões</a>
+    <a onclick="nav('goals')" id="nav-goals">Metas</a>
+    <a onclick="nav('categories')" id="nav-categories">Categorias</a>
+  </nav>
+  <div class="header-actions">
+    <button class="btn btn-primary" onclick="openModal('modal-tx')">+ Nova transação</button>
+  </div>
+</header>
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div id="page-dashboard" class="page active">
+<main>
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub">Visão geral das suas finanças</div>
+  <div class="periods">
+    <button class="period-btn">7 dias</button>
+    <button class="period-btn active">Este mês</button>
+    <button class="period-btn">3 meses</button>
+    <button class="period-btn">Tudo</button>
+  </div>
+  <div class="stats">
+    <div class="stat-card"><div class="stat-label">Receitas</div><div class="stat-value" style="color:#16a34a">R$ 5.800</div><div class="stat-sub">↑ entradas</div></div>
+    <div class="stat-card"><div class="stat-label">Despesas</div><div class="stat-value" style="color:#dc2626">R$ 2.440</div><div class="stat-sub">↓ saídas</div></div>
+    <div class="stat-card"><div class="stat-label">Saldo</div><div class="stat-value" style="color:#1a1a2e">R$ 3.360</div><div class="stat-sub">balanço</div></div>
+    <div class="stat-card"><div class="stat-label">Cartão</div><div class="stat-value" style="color:#7c3aed">R$ 2.100</div><div class="stat-sub">42% do limite</div></div>
+  </div>
+  <div class="limit-card">
+    <div class="limit-header"><span class="limit-label">Nubank — uso do limite</span><span class="limit-value">R$ 2.100 / R$ 5.000</span></div>
+    <div class="bar-track"><div class="bar-fill" style="background:#16a34a;width:42%"></div></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-header">
+      <span class="chart-title">Evolução mensal</span>
+      <div class="chart-filters">
+        <button class="period-btn active">Ambos</button>
+        <button class="period-btn">Receitas</button>
+        <button class="period-btn">Despesas</button>
+      </div>
+    </div>
+    <div class="fake-chart">
+      <div class="chart-group"><div class="bar bar-income" style="height:100px"></div><div class="bar bar-expense" style="height:55px"></div></div>
+      <div class="chart-group"><div class="bar bar-income" style="height:120px"></div><div class="bar bar-expense" style="height:70px"></div></div>
+      <div class="chart-group"><div class="bar bar-income" style="height:110px"></div><div class="bar bar-expense" style="height:60px"></div></div>
+      <div class="chart-group"><div class="bar bar-income" style="height:130px"></div><div class="bar bar-expense" style="height:80px"></div></div>
+      <div class="chart-group"><div class="bar bar-income" style="height:115px"></div><div class="bar bar-expense" style="height:65px"></div></div>
+      <div class="chart-group"><div class="bar bar-income" style="height:140px"></div><div class="bar bar-expense" style="height:90px"></div></div>
+      <div class="chart-group"><div class="bar bar-income bar-proj" style="height:130px"></div><div class="bar bar-expense bar-proj" style="height:75px"></div></div>
+    </div>
+    <div class="chart-x"><span>Out</span><span>Nov</span><span>Dez</span><span>Jan</span><span>Fev</span><span>Mar</span><span>Abr</span></div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>Realizado</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(22,163,74,0.35)"></div>Projetado</div>
+    </div>
+  </div>
+  <div class="goals-card">
+    <div class="sec-title">Metas em andamento</div>
+    <div class="goal-dash">
+      <div class="goal-row"><span class="goal-name">Reserva de emergência</span><span class="goal-pct-ok">28% ✓</span></div>
+      <div class="goal-track"><div class="goal-fill-ok" style="width:28%"></div></div>
+      <div class="goal-vals"><span>R$ 4.200</span><span>R$ 15.000</span></div>
+    </div>
+    <div class="goal-dash">
+      <div class="goal-row"><span class="goal-name">Viagem Europa</span><span class="goal-pct-warn">19% ⚠</span></div>
+      <div class="goal-track"><div class="goal-fill-warn" style="width:19%"></div></div>
+      <div class="goal-vals"><span>R$ 1.500</span><span>R$ 8.000</span></div>
+    </div>
+    <div class="goal-dash" style="margin-bottom:0">
+      <div class="goal-row"><span class="goal-name">Notebook novo</span><span class="goal-pct-done">75% 🚀</span></div>
+      <div class="goal-track"><div class="goal-fill-done" style="width:75%"></div></div>
+      <div class="goal-vals"><span>R$ 3.000</span><span>R$ 4.000</span></div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ═══════════════ TRANSAÇÕES ═══════════════ -->
+<div id="page-transactions" class="page">
+<main>
+  <div class="page-title">Transações</div>
+  <div class="page-sub" style="margin-bottom:16px">Todas as suas movimentações</div>
+  <div class="summary">
+    <div class="summary-pill"><div class="s-label">Receitas</div><div class="s-value" style="color:#16a34a">R$ 5.800,00</div></div>
+    <div class="summary-pill"><div class="s-label">Despesas</div><div class="s-value" style="color:#dc2626">R$ 2.440,00</div></div>
+    <div class="summary-pill"><div class="s-label">Saldo</div><div class="s-value" style="color:#1a1a2e">R$ 3.360,00</div></div>
+  </div>
+  <div class="filters">
+    <div class="search-box"><span>🔍</span><input type="text" placeholder="Buscar..." /></div>
+    <select><option>Todos os tipos</option><option>Receitas</option><option>Despesas</option></select>
+    <select><option>Todas categorias</option><option>💰 Salário</option><option>🍔 Alimentação</option><option>🏠 Moradia</option><option>🚗 Transporte</option><option>🎉 Lazer</option><option>💊 Saúde</option></select>
+    <select><option>Este mês</option><option>7 dias</option><option>3 meses</option><option>Todo período</option></select>
+  </div>
+  <div class="table-card">
+    <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Data ↓</th><th>Tipo</th><th>Categoria</th><th>Subcategoria</th><th>Descrição</th><th>Valor</th><th>Ações</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="date-cell">01/04/2025</td><td><span class="tag tag-income">Receita</span></td><td><div class="cat-cell"><div class="dot" style="background:#16a34a"></div>Salário</div></td><td class="empty">—</td><td class="desc-cell">Salário abril</td><td class="val-income">R$ 5.000,00</td><td><div class="actions"><button class="btn-edit">Editar</button><button class="btn-del">Excluir</button></div></td></tr>
+        <tr><td class="date-cell">03/04/2025</td><td><span class="tag tag-expense">Despesa</span></td><td><div class="cat-cell"><div class="dot" style="background:#2563eb"></div>Moradia</div></td><td class="empty">—</td><td class="desc-cell">Aluguel</td><td class="val-expense">R$ 1.200,00</td><td><div class="actions"><button class="btn-edit">Editar</button><button class="btn-del">Excluir</button></div></td></tr>
+        <tr><td class="date-cell">05/04/2025</td><td><span class="tag tag-expense">Despesa</span></td><td><div class="cat-cell"><div class="dot" style="background:#ea580c"></div>Alimentação</div></td><td class="desc-cell">Mercado</td><td class="desc-cell">Mercado semanal</td><td class="val-expense">R$ 320,00</td><td><div class="actions"><button class="btn-edit">Editar</button><button class="btn-del">Excluir</button></div></td></tr>
+        <tr><td class="date-cell">08/04/2025</td><td><span class="tag tag-expense">Despesa</span></td><td><div class="cat-cell"><div class="dot" style="background:#7c3aed"></div>Transporte</div></td><td class="desc-cell">Combustível</td><td class="desc-cell">Posto Shell</td><td class="val-expense">R$ 150,00</td><td><div class="actions"><button class="btn-edit">Editar</button><button class="btn-del">Excluir</button></div></td></tr>
+        <tr><td class="date-cell">12/04/2025</td><td><span class="tag tag-expense">Despesa</span></td><td><div class="cat-cell"><div class="dot" style="background:#db2777"></div>Lazer</div></td><td class="empty">—</td><td class="desc-cell">Cinema</td><td class="val-expense">R$ 90,00</td><td><div class="actions"><button class="btn-edit">Editar</button><button class="btn-del">Excluir</button></div></td></tr>
+        <tr><td class="date-cell">18/04/2025</td><td><span class="tag tag-income">Receita</span></td><td><div class="cat-cell"><div class="dot" style="background:#0d9488"></div>Freelance</div></td><td class="empty">—</td><td class="desc-cell">Freelance design</td><td class="val-income">R$ 800,00</td><td><div class="actions"><button class="btn-edit">Editar</button><button class="btn-del">Excluir</button></div></td></tr>
+        <tr style="opacity:.6"><td class="date-cell">03/05/2025<span class="badge badge-prev">PREV</span></td><td><span class="tag tag-expense">Despesa</span></td><td><div class="cat-cell"><div class="dot" style="background:#2563eb"></div>Moradia</div></td><td class="empty">—</td><td class="desc-cell">Aluguel maio</td><td class="val-expense">R$ 1.200,00</td><td><div class="actions"><button class="btn-edit">Editar</button><button class="btn-del">Excluir</button></div></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div class="table-footer"><span>7 transações</span><span>Receitas: <span class="green">R$ 5.800,00</span></span><span>Despesas: <span class="red">R$ 1.760,00</span></span></div>
+</main>
+</div>
+
+<!-- ═══════════════ CARTÕES ═══════════════ -->
+<div id="page-cards" class="page">
+<main>
+  <div class="page-header">
+    <div><div class="page-title">Cartões de Crédito</div><div class="page-sub">Gerencie seus cartões e faturas</div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-purple" onclick="openModal('modal-ccexp')">+ Despesa no cartão</button>
+      <button class="btn btn-primary" onclick="openModal('modal-card')">+ Novo cartão</button>
+    </div>
+  </div>
+  <div class="cards-grid">
+    <div class="credit-card selected" style="background:linear-gradient(135deg,#7c3aed,#5b21b6)">
+      <div class="card-top"><span class="card-name">💳 Nubank</span><div class="card-chip"></div></div>
+      <div class="card-spent">R$ 2.100,00</div>
+      <div class="card-limit-txt">de R$ 5.000,00 · 42% usado</div>
+      <div class="card-bar-track"><div class="card-bar-fill" style="width:42%"></div></div>
+      <div class="card-footer"><span>Fecha dia 15</span><span>Vence dia 22</span></div>
+      <div class="card-btns"><button class="card-btn">Editar</button><button class="card-btn">Excluir</button></div>
+    </div>
+    <div class="credit-card" style="background:linear-gradient(135deg,#ea580c,#c2410c)">
+      <div class="card-top"><span class="card-name">💳 Itaú Platinum</span><div class="card-chip"></div></div>
+      <div class="card-spent">R$ 850,00</div>
+      <div class="card-limit-txt">de R$ 8.000,00 · 11% usado</div>
+      <div class="card-bar-track"><div class="card-bar-fill" style="width:11%"></div></div>
+      <div class="card-footer"><span>Fecha dia 20</span><span>Vence dia 27</span></div>
+      <div class="card-btns"><button class="card-btn">Editar</button><button class="card-btn">Excluir</button></div>
+    </div>
+    <div class="add-card" onclick="openModal('modal-card')"><div style="font-size:24px">＋</div><div style="font-size:13px;font-weight:500">Adicionar cartão</div></div>
+  </div>
+  <div class="fatura-header">
+    <span style="font-size:13px;font-weight:600">Fatura — Nubank</span>
+    <div class="fatura-tabs">
+      <button class="fatura-tab active">Atual (Abr)</button>
+      <button class="fatura-tab">Mai</button>
+      <button class="fatura-tab">Jun</button>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Data</th><th>Categoria</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead>
+      <tbody>
+        <tr><td class="date-cell">10/04/2025</td><td><div class="cat-cell"><div class="dot" style="background:#ea580c"></div>Alimentação</div></td><td class="desc-cell">Restaurante Boteco</td><td><span class="tag tag-unica">Única</span></td><td class="val-expense">R$ 180,00</td></tr>
+        <tr><td class="date-cell">12/04/2025</td><td><div class="cat-cell"><div class="dot" style="background:#db2777"></div>Lazer</div></td><td class="desc-cell">Netflix</td><td><span class="tag tag-fixa">Fixa mensal</span></td><td class="val-expense">R$ 45,00</td></tr>
+        <tr><td class="date-cell">18/04/2025</td><td><div class="cat-cell"><div class="dot" style="background:#0d9488"></div>Saúde</div></td><td class="desc-cell">Consulta médica</td><td><span class="tag tag-parc">1/3x</span></td><td class="val-expense">R$ 100,00</td></tr>
+        <tr style="opacity:.55"><td class="date-cell">22/05/2025<span class="badge badge-future">FUTURO</span></td><td><div class="cat-cell"><div class="dot" style="background:#0d9488"></div>Saúde</div></td><td class="desc-cell">Consulta médica</td><td><span class="tag tag-parc">2/3x</span></td><td class="val-expense">R$ 100,00</td></tr>
+        <tr style="opacity:.55"><td class="date-cell">22/06/2025<span class="badge badge-future">FUTURO</span></td><td><div class="cat-cell"><div class="dot" style="background:#0d9488"></div>Saúde</div></td><td class="desc-cell">Consulta médica</td><td><span class="tag tag-parc">3/3x</span></td><td class="val-expense">R$ 100,00</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="fatura-total"><span class="fatura-total-label">Total da fatura atual</span><span class="fatura-total-value">R$ 325,00</span></div>
+  </div>
+</main>
+</div>
+
+<!-- ═══════════════ METAS ═══════════════ -->
+<div id="page-goals" class="page">
+<main>
+  <div class="page-header">
+    <div><div class="page-title">Metas Financeiras</div><div class="page-sub">Acompanhe seu progresso e projete o futuro</div></div>
+    <button class="btn btn-primary" onclick="openModal('modal-goal')">+ Nova meta</button>
+  </div>
+  <div class="stats">
+    <div class="stat-card"><div class="stat-label">Metas ativas</div><div class="stat-value" style="color:#1a1a2e">3</div><div class="stat-sub">em andamento</div></div>
+    <div class="stat-card"><div class="stat-label">No ritmo</div><div class="stat-value" style="color:#16a34a">2</div><div class="stat-sub">progresso ok</div></div>
+    <div class="stat-card"><div class="stat-label">Atrasadas</div><div class="stat-value" style="color:#dc2626">1</div><div class="stat-sub">atenção</div></div>
+    <div class="stat-card"><div class="stat-label">Total guardado</div><div class="stat-value" style="color:#2563eb">R$ 8.700</div><div class="stat-sub">em todas metas</div></div>
+  </div>
+  <div class="goals-grid">
+    <div class="goal-card">
+      <div class="goal-card-header"><span class="goal-card-name">Reserva de emergência</span><span class="goal-pct-ok">28%</span></div>
+      <div class="goal-type-txt">💰 Economia</div>
+      <div class="goal-card-track"><div class="goal-card-fill goal-fill-ok" style="width:28%"></div></div>
+      <div class="goal-card-values"><span style="color:#16a34a;font-weight:600">R$ 4.200,00</span><span style="color:#adb5bd">meta: R$ 15.000,00</span></div>
+      <div class="goal-card-status status-ok">✓ No ritmo certo! · Faltam R$ 10.800,00<div style="font-size:11px;margin-top:3px;opacity:.8">Prazo: 31/12/2025</div></div>
+      <div class="sim-box"><div class="sim-label">Simulação: se eu guardar por mês</div><div class="sim-row"><input class="sim-input" type="number" value="1000" /><span class="sim-result">→ 11 meses</span></div></div>
+      <div class="goal-actions"><button class="btn-edit" style="flex:1">Editar</button><button class="btn-del" style="flex:1">Excluir</button></div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-card-header"><span class="goal-card-name">Viagem Europa</span><span class="goal-pct-warn">19%</span></div>
+      <div class="goal-type-txt">💰 Economia</div>
+      <div class="goal-card-track"><div class="goal-card-fill goal-fill-warn" style="width:19%"></div></div>
+      <div class="goal-card-values"><span style="color:#16a34a;font-weight:600">R$ 1.500,00</span><span style="color:#adb5bd">meta: R$ 8.000,00</span></div>
+      <div class="goal-card-status status-warn">⚠ Abaixo do esperado · Faltam R$ 6.500,00<div style="font-size:11px;margin-top:3px;opacity:.8">Prazo: 01/10/2025</div></div>
+      <div class="sim-box"><div class="sim-label">Simulação: se eu guardar por mês</div><div class="sim-row"><input class="sim-input" type="number" value="800" /><span class="sim-result">→ 9 meses</span></div></div>
+      <div class="goal-actions"><button class="btn-edit" style="flex:1">Editar</button><button class="btn-del" style="flex:1">Excluir</button></div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-card-header"><span class="goal-card-name">Notebook novo</span><span class="goal-pct-done">75%</span></div>
+      <div class="goal-type-txt">🎯 Controle de gastos</div>
+      <div class="goal-card-track"><div class="goal-card-fill goal-fill-done" style="width:75%"></div></div>
+      <div class="goal-card-values"><span style="color:#2563eb;font-weight:600">R$ 3.000,00</span><span style="color:#adb5bd">meta: R$ 4.000,00</span></div>
+      <div class="goal-card-status status-done">🚀 Antecipado! · Faltam R$ 1.000,00<div style="font-size:11px;margin-top:3px;opacity:.8">Prazo: 30/06/2025</div></div>
+      <div class="sim-box"><div class="sim-label">Simulação: se eu guardar por mês</div><div class="sim-row"><input class="sim-input" type="number" value="500" /><span class="sim-result">→ 2 meses</span></div></div>
+      <div class="goal-actions"><button class="btn-edit" style="flex:1">Editar</button><button class="btn-del" style="flex:1">Excluir</button></div>
+    </div>
+    <div class="goal-add" onclick="openModal('modal-goal')"><div style="font-size:26px">＋</div><div style="font-size:13px;font-weight:500">Nova meta</div></div>
+  </div>
+</main>
+</div>
+
+<!-- ═══════════════ CATEGORIAS ═══════════════ -->
+<div id="page-categories" class="page">
+<main>
+  <div class="page-header">
+    <div><div class="page-title">Categorias</div><div class="page-sub">Organize e personalize suas categorias</div></div>
+    <button class="btn btn-primary" onclick="openModal('modal-cat')">+ Nova categoria</button>
+  </div>
+  <div class="type-tabs">
+    <button class="type-tab active">Todas</button>
+    <button class="type-tab">Receitas</button>
+    <button class="type-tab">Despesas</button>
+  </div>
+  <div class="cats-grid">
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-left" onclick="toggleSub('s1')"><div class="cat-icon-box" style="background:#16a34a18">💰</div><div><div class="cat-name">Salário <span class="cat-type-badge badge-income">Receita</span></div><div class="cat-meta">8 transações · 0 subcategorias</div></div></div>
+        <div class="actions"><button class="btn-edit" onclick="openModal('modal-cat')">Editar</button><button class="btn-del">Excluir</button></div>
+      </div>
+      <div class="cat-bar-row"><div class="cat-bar-track"><div class="cat-bar-fill" style="background:#16a34a;width:60%"></div></div><span class="cat-bar-pct">60%</span></div>
+      <button class="expand-btn" onclick="toggleSub('s1')">▸ Ver subcategorias</button>
+      <div class="subcats" id="s1">
+        <div style="font-size:12px;color:#adb5bd;padding:4px 0">Nenhuma subcategoria ainda</div>
+        <div class="subcat-add">
+          <input class="subcat-input" placeholder="Nova subcategoria..." />
+          <button class="btn-add-sub" onclick="addSubcat(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-left" onclick="toggleSub('s2')"><div class="cat-icon-box" style="background:#ea580c18">🍔</div><div><div class="cat-name">Alimentação <span class="cat-type-badge badge-expense">Despesa</span></div><div class="cat-meta">12 transações · 2 subcategorias</div></div></div>
+        <div class="actions"><button class="btn-edit" onclick="openModal('modal-cat')">Editar</button><button class="btn-del">Excluir</button></div>
+      </div>
+      <div class="cat-bar-row"><div class="cat-bar-track"><div class="cat-bar-fill" style="background:#ea580c;width:45%"></div></div><span class="cat-bar-pct">45%</span></div>
+      <button class="expand-btn" onclick="toggleSub('s2')">▸ Ver subcategorias</button>
+      <div class="subcats" id="s2">
+        <div class="subcat-item"><span class="subcat-name"><span class="subcat-arrow">└</span>Mercado</span><button class="btn-del-sm">✕</button></div>
+        <div class="subcat-item"><span class="subcat-name"><span class="subcat-arrow">└</span>Restaurante</span><button class="btn-del-sm">✕</button></div>
+        <div class="subcat-add">
+          <input class="subcat-input" placeholder="Nova subcategoria..." />
+          <button class="btn-add-sub" onclick="addSubcat(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-left" onclick="toggleSub('s3')"><div class="cat-icon-box" style="background:#2563eb18">🏠</div><div><div class="cat-name">Moradia <span class="cat-type-badge badge-expense">Despesa</span></div><div class="cat-meta">6 transações · 0 subcategorias</div></div></div>
+        <div class="actions"><button class="btn-edit" onclick="openModal('modal-cat')">Editar</button><button class="btn-del">Excluir</button></div>
+      </div>
+      <div class="cat-bar-row"><div class="cat-bar-track"><div class="cat-bar-fill" style="background:#2563eb;width:30%"></div></div><span class="cat-bar-pct">30%</span></div>
+      <button class="expand-btn" onclick="toggleSub('s3')">▸ Ver subcategorias</button>
+      <div class="subcats" id="s3">
+        <div style="font-size:12px;color:#adb5bd;padding:4px 0">Nenhuma subcategoria ainda</div>
+        <div class="subcat-add">
+          <input class="subcat-input" placeholder="Nova subcategoria..." />
+          <button class="btn-add-sub" onclick="addSubcat(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-left" onclick="toggleSub('s4')"><div class="cat-icon-box" style="background:#7c3aed18">🚗</div><div><div class="cat-name">Transporte <span class="cat-type-badge badge-expense">Despesa</span></div><div class="cat-meta">9 transações · 3 subcategorias</div></div></div>
+        <div class="actions"><button class="btn-edit" onclick="openModal('modal-cat')">Editar</button><button class="btn-del">Excluir</button></div>
+      </div>
+      <div class="cat-bar-row"><div class="cat-bar-track"><div class="cat-bar-fill" style="background:#7c3aed;width:20%"></div></div><span class="cat-bar-pct">20%</span></div>
+      <button class="expand-btn" onclick="toggleSub('s4')">▸ Ver subcategorias</button>
+      <div class="subcats" id="s4">
+        <div class="subcat-item"><span class="subcat-name"><span class="subcat-arrow">└</span>Público</span><button class="btn-del-sm">✕</button></div>
+        <div class="subcat-item"><span class="subcat-name"><span class="subcat-arrow">└</span>Apps (Uber/99)</span><button class="btn-del-sm">✕</button></div>
+        <div class="subcat-item"><span class="subcat-name"><span class="subcat-arrow">└</span>Combustível</span><button class="btn-del-sm">✕</button></div>
+        <div class="subcat-add">
+          <input class="subcat-input" placeholder="Nova subcategoria..." />
+          <button class="btn-add-sub" onclick="addSubcat(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-left" onclick="toggleSub('s5')"><div class="cat-icon-box" style="background:#db277718">🎉</div><div><div class="cat-name">Lazer <span class="cat-type-badge badge-expense">Despesa</span></div><div class="cat-meta">5 transações · 0 subcategorias</div></div></div>
+        <div class="actions"><button class="btn-edit" onclick="openModal('modal-cat')">Editar</button><button class="btn-del">Excluir</button></div>
+      </div>
+      <div class="cat-bar-row"><div class="cat-bar-track"><div class="cat-bar-fill" style="background:#db2777;width:15%"></div></div><span class="cat-bar-pct">15%</span></div>
+      <button class="expand-btn" onclick="toggleSub('s5')">▸ Ver subcategorias</button>
+      <div class="subcats" id="s5">
+        <div style="font-size:12px;color:#adb5bd;padding:4px 0">Nenhuma subcategoria ainda</div>
+        <div class="subcat-add">
+          <input class="subcat-input" placeholder="Nova subcategoria..." />
+          <button class="btn-add-sub" onclick="addSubcat(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat-card">
+      <div class="cat-header">
+        <div class="cat-left" onclick="toggleSub('s6')"><div class="cat-icon-box" style="background:#0d948818">💊</div><div><div class="cat-name">Saúde <span class="cat-type-badge badge-expense">Despesa</span></div><div class="cat-meta">4 transações · 0 subcategorias</div></div></div>
+        <div class="actions"><button class="btn-edit" onclick="openModal('modal-cat')">Editar</button><button class="btn-del">Excluir</button></div>
+      </div>
+      <div class="cat-bar-row"><div class="cat-bar-track"><div class="cat-bar-fill" style="background:#0d9488;width:10%"></div></div><span class="cat-bar-pct">10%</span></div>
+      <button class="expand-btn" onclick="toggleSub('s6')">▸ Ver subcategorias</button>
+      <div class="subcats" id="s6">
+        <div style="font-size:12px;color:#adb5bd;padding:4px 0">Nenhuma subcategoria ainda</div>
+        <div class="subcat-add">
+          <input class="subcat-input" placeholder="Nova subcategoria..." />
+          <button class="btn-add-sub" onclick="addSubcat(this)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat-add" onclick="openModal('modal-cat')"><div style="font-size:22px">＋</div><div style="font-size:13px;font-weight:500">Nova categoria</div></div>
+  </div>
+</main>
+</div>
+
+<!-- ═══════════════ MODAIS ═══════════════ -->
+
+<!-- Modal Nova Transação -->
+<div class="modal-overlay" id="modal-tx">
+  <div class="modal">
+    <div class="modal-title">Nova transação</div>
+    <div class="type-toggle">
+      <button class="type-btn t-income">↑ Receita</button>
+      <button class="type-btn">↓ Despesa</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Valor (R$)</label><input class="form-input" type="number" placeholder="0,00" /></div>
+      <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Categoria</label><select class="form-select"><option>Selecionar...</option><option>💰 Salário</option><option>🍔 Alimentação</option><option>🏠 Moradia</option><option>🚗 Transporte</option><option>🎉 Lazer</option><option>💊 Saúde</option></select></div>
+      <div class="form-group"><label class="form-label">Subcategoria</label><select class="form-select"><option>Nenhuma</option><option>Mercado</option><option>Restaurante</option></select></div>
+    </div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Descrição (opcional)</label><input class="form-input" type="text" placeholder="Ex: Almoço com amigos" /></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Status</label><select class="form-select"><option>Realizado</option><option>Previsto</option></select></div></div>
+    <label class="recurring-toggle"><input type="checkbox" /> Tornar recorrente</label>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-tx')">Cancelar</button>
+      <button class="btn-save" onclick="closeModal('modal-tx');showToast('Transação adicionada!')">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova Despesa Cartão -->
+<div class="modal-overlay" id="modal-ccexp">
+  <div class="modal">
+    <div class="modal-title">Nova despesa no cartão</div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Cartão</label><select class="form-select"><option>💳 Nubank</option><option>💳 Itaú Platinum</option></select></div></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Valor (R$)</label><input class="form-input" type="number" placeholder="0,00" /></div>
+      <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Categoria</label><select class="form-select"><option>Selecionar...</option><option>🍔 Alimentação</option><option>🏠 Moradia</option><option>🚗 Transporte</option><option>🎉 Lazer</option><option>💊 Saúde</option></select></div>
+      <div class="form-group"><label class="form-label">Subcategoria</label><select class="form-select"><option>Nenhuma</option><option>Mercado</option><option>Restaurante</option></select></div>
+    </div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Descrição</label><input class="form-input" type="text" placeholder="Ex: Restaurante XYZ" /></div></div>
+    <label class="form-label" style="margin-bottom:8px;display:block">Tipo de despesa</label>
+    <div class="type-toggle" style="margin-bottom:14px">
+      <button class="type-btn t-purple">Única</button>
+      <button class="type-btn">Parcelada</button>
+      <button class="type-btn">Fixa mensal</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-ccexp')">Cancelar</button>
+      <button class="btn-save" onclick="closeModal('modal-ccexp');showToast('Despesa adicionada!')">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo Cartão -->
+<div class="modal-overlay" id="modal-card">
+  <div class="modal">
+    <div class="modal-title">Novo cartão</div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Nome do cartão</label><input class="form-input" type="text" placeholder="Ex: Nubank" /></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Limite (R$)</label><input class="form-input" type="number" placeholder="5000" /></div></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Dia de fechamento</label><input class="form-input" type="number" placeholder="15" min="1" max="31" /></div>
+      <div class="form-group"><label class="form-label">Dia de vencimento</label><input class="form-input" type="number" placeholder="22" min="1" max="31" /></div>
+    </div>
+    <div class="form-group" style="margin-bottom:18px"><label class="form-label">Cor</label>
+      <div class="color-picker" style="margin-top:8px">
+        <div class="color-dot selected" style="background:#7c3aed"></div>
+        <div class="color-dot" style="background:#2563eb"></div>
+        <div class="color-dot" style="background:#16a34a"></div>
+        <div class="color-dot" style="background:#ea580c"></div>
+        <div class="color-dot" style="background:#dc2626"></div>
+        <div class="color-dot" style="background:#0d9488"></div>
+        <div class="color-dot" style="background:#db2777"></div>
+        <div class="color-dot" style="background:#1a1a2e"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-card')">Cancelar</button>
+      <button class="btn-save" onclick="closeModal('modal-card');showToast('Cartão criado!')">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova Meta -->
+<div class="modal-overlay" id="modal-goal">
+  <div class="modal">
+    <div class="modal-title">Nova meta</div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Nome</label><input class="form-input" type="text" placeholder="Ex: Reserva de emergência" /></div></div>
+    <div class="type-toggle">
+      <button class="type-btn t-savings">💰 Economia</button>
+      <button class="type-btn">🎯 Controle de gastos</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Valor alvo (R$)</label><input class="form-input" type="number" placeholder="10000" /></div>
+      <div class="form-group"><label class="form-label">Valor atual (R$)</label><input class="form-input" type="number" placeholder="0" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data limite</label><input class="form-input" type="date" /></div>
+      <div class="form-group"><label class="form-label">Contribuição mensal (R$)</label><input class="form-input" type="number" placeholder="500" /></div>
+    </div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Categoria (opcional)</label><select class="form-select"><option>Nenhuma</option><option>💰 Salário</option><option>🍔 Alimentação</option><option>🏠 Moradia</option></select></div></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-goal')">Cancelar</button>
+      <button class="btn-save" onclick="closeModal('modal-goal');showToast('Meta criada!')">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova Categoria -->
+<div class="modal-overlay" id="modal-cat">
+  <div class="modal">
+    <div class="modal-title">Nova categoria</div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Nome</label><input class="form-input" type="text" placeholder="Ex: Alimentação" /></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Tipo</label><select class="form-select"><option>Despesa</option><option>Receita</option><option>Ambos</option></select></div></div>
+    <div class="form-group" style="margin-bottom:12px"><label class="form-label">Cor</label>
+      <div class="color-picker" style="margin-top:8px">
+        <div class="color-dot selected" style="background:#16a34a"></div>
+        <div class="color-dot" style="background:#dc2626"></div>
+        <div class="color-dot" style="background:#2563eb"></div>
+        <div class="color-dot" style="background:#ea580c"></div>
+        <div class="color-dot" style="background:#7c3aed"></div>
+        <div class="color-dot" style="background:#db2777"></div>
+        <div class="color-dot" style="background:#0d9488"></div>
+        <div class="color-dot" style="background:#ca8a04"></div>
+        <div class="color-dot" style="background:#1a1a2e"></div>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px"><label class="form-label">Ícone</label>
+      <div class="icon-picker" style="margin-top:6px">
+        <span class="icon-opt selected">💰</span><span class="icon-opt">🍔</span><span class="icon-opt">🏠</span><span class="icon-opt">🚗</span><span class="icon-opt">🎉</span><span class="icon-opt">💊</span><span class="icon-opt">📚</span><span class="icon-opt">✈️</span><span class="icon-opt">🛍️</span><span class="icon-opt">💡</span><span class="icon-opt">🎮</span><span class="icon-opt">💼</span><span class="icon-opt">🏋️</span><span class="icon-opt">🌱</span>
+      </div>
+    </div>
+    <div class="preview-box">
+      <div class="preview-icon-box" style="background:#16a34a18">💰</div>
+      <span class="preview-name" style="color:#16a34a">Prévia da categoria</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-cat')">Cancelar</button>
+      <button class="btn-save" onclick="closeModal('modal-cat');showToast('Categoria criada!')">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // Navegação
+  function nav(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('nav-' + page).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // Modais
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+  });
+
+  // Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Subcategorias toggle
+  function toggleSub(id) {
+    const el = document.getElementById(id);
+    const btn = el.previousElementSibling;
+    el.classList.toggle('open');
+    btn.textContent = el.classList.contains('open') ? '▾ Ocultar subcategorias' : '▸ Ver subcategorias';
+  }
+
+  // Adicionar subcategoria dinamicamente
+  function addSubcat(btn) {
+    const container = btn.closest('.subcats');
+    const input = container.querySelector('.subcat-input');
+    const name = input.value.trim();
+    if (!name) return;
+
+    // Remove o "Nenhuma subcategoria ainda" se existir
+    const empty = container.querySelector('div[style*="color:#adb5bd"]');
+    if (empty) empty.remove();
+
+    // Cria o item
+    const item = document.createElement('div');
+    item.className = 'subcat-item';
+    item.innerHTML = `<span class="subcat-name"><span class="subcat-arrow">└</span>${name}</span><button class="btn-del-sm" onclick="this.closest('.subcat-item').remove();updateSubCount(this)">✕</button>`;
+    container.insertBefore(item, container.querySelector('.subcat-add'));
+
+    // Atualiza contador no cabeçalho
+    updateSubCount(container);
+    input.value = '';
+    showToast('Subcategoria criada!');
+  }
+
+  function updateSubCount(ref) {
+    const container = ref.closest ? ref.closest('.subcats') : ref;
+    const card = container.closest('.cat-card');
+    const count = container.querySelectorAll('.subcat-item').length;
+    const meta = card.querySelector('.cat-meta');
+    const txCount = meta.textContent.split('·')[0].trim();
+    meta.textContent = `${txCount} · ${count} subcategoria${count !== 1 ? 's' : ''}`;
+  }
+
+  // Deletar subcategoria com atualização do contador
+  document.querySelectorAll('.btn-del-sm').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const item = this.closest('.subcat-item');
+      const container = item.closest('.subcats');
+      item.remove();
+      updateSubCount(container);
+    });
+  });
+
+  // Period buttons
+  document.querySelectorAll('.periods').forEach(group => {
+    group.querySelectorAll('.period-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  });
+
+  // Type tabs
+  document.querySelectorAll('.type-tabs').forEach(group => {
+    group.querySelectorAll('.type-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.type-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  });
+
+  // Fatura tabs
+  document.querySelectorAll('.fatura-tabs').forEach(group => {
+    group.querySelectorAll('.fatura-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.fatura-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  });
+
+  // Color dots
+  document.querySelectorAll('.color-picker').forEach(picker => {
+    picker.querySelectorAll('.color-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        picker.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+        dot.classList.add('selected');
+      });
+    });
+  });
+
+  // Icon picker
+  document.querySelectorAll('.icon-picker').forEach(picker => {
+    picker.querySelectorAll('.icon-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        picker.querySelectorAll('.icon-opt').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+      });
+    });
+  });
+</script>
+</body>
+</html>
